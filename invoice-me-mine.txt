@@ -12,11 +12,17 @@ Last modification ï¿½
  Add: Option :  VCH WeekDay0  : @@IsSales OR @@IsReceipt
  
 [!Part :VCH WeekDay0]
-Add: Lines:LPONumberLine,LPODateLine,MedRepLine,LPORefLine
+Add: Lines:LPONumberLine,LPODateLine,MedRepLine,LPORefLine,LPOVatLine
 
 [Line : LPONumberLine]
-Field : Medium Prompt, LPONumber
+Field : Medium Prompt, LPONumber,Simple Prompt, BalanceCF
 Local : Field : Medium Prompt : Set as : "LPO Number"
+Local : Field : Simple Prompt : Set as : "Balance C/F"
+
+[Field : BalanceCF]
+Use : Amount Field
+Storage : BalanceCF
+
 [Field : LPONumber]
 Use : Name Field
 Storage : LPONumber
@@ -24,25 +30,46 @@ Storage : LPONumber
 [Line : LPODateLine]
 Field : Medium Prompt, LPODate
 Local : Field : Medium Prompt : Set as : "LPO Date"
+
+
 [Field : LPODate]
 Use : Short Date Field
 Storage : LPODate
 Set as	: $Date
 
 [Line : MedRepLine]
-Field : Medium Prompt, MedRep
+Field : Medium Prompt, MedRep,Simple Prompt, AmntPaid
+Local : Field : Simple Prompt : Set as : "Amount Paid"
 Local : Field : Medium Prompt : Set as : "Med Rep"
+
 [Field : MedRep]
-Use : Short Name Field
+Use : Name Field
 Storage : MedRep
 
+[Field : AmntPaid]
+Use : Amount Field
+Storage : AmntPaid
+
 [Line : LPORefLine]
-Field : Medium Prompt, LPORef
+Field : Medium Prompt, LPORef,Simple Prompt,DiscGiven
 Local : Field : Medium Prompt : Set as : "Reference"
+Local : Field : Simple Prompt : Set as : "Sales Discount(%)"
+
 [Field : LPORef]
 Use : Short Name Field
 Storage : LPORef
- 
+
+[Field:DiscGiven]
+	Use : Amount Field
+	Storage    : DiscGiven
+	
+[Line : LPOVatLine]
+Field : Medium Prompt, VatRep
+Local : Field : Medium Prompt : Set as : "Sales VAT(%)"
+
+[Field:VatRep]
+	Use : Amount Field
+	Storage    : VatGiven
 
 
 [System: Formula]
@@ -61,6 +88,10 @@ Storage : LPORef
 	LPODate		:Date:10020
 	MedRep		:String:10013
 	LPORef		:String:10014
+	BalanceCF	:Amount:10015
+	AmntPaid	:Amount:10016
+	DiscGiven	:Amount:10022
+	VatGiven	:Amount:10023
 	
 
 
@@ -124,7 +155,7 @@ Delete    : PageBreak
 
 ;;Add : Bottom Part : My Invoice Bottom Part
 
-[#Form : Sales Color]
+/**[#Form : Sales Color]
 
 Add : Print : Sales Invoice
 
@@ -132,7 +163,7 @@ Add : Print : Sales Invoice
 
 Form : Sales Invoice
 
-Object : Voucher
+Object : Voucher**/
 
 
 
@@ -299,7 +330,7 @@ Objective(s) -
             [Field: Global CmpName]
 
 				Use 		: Name Field
-				Set as  	: "Tax Invoice";;@@CMPMailNAme  ;;;setting the company name using system formula
+				Set as  	: "Cash Sale";;@@CMPMailNAme  ;;;setting the company name using system formula
 				FullWidth	: Yes
 				Align		: Centre
 
@@ -391,8 +422,9 @@ Objective(s) -
 			Local: Field: IE BatchNo     : Set as    : "Batch No"
 			Local: Field: IE ExpDate     : Set as    : "Exp. Date"
 			Local: Field: IE Qty        : Set as    : "Qty"
+			Local: Field: IE RateUnit        : Set as    : "Pack"
 			Local: Field: IE Rate 	    : Set as    : "Rate"
-			Local: Field: IE Discount   : Set as    : "Discount"
+			Local: Field: IE Discount   : Set as    : "Discount/Vat(%)"
 			Local: Field: IE Discount Total   : Set as    : "Discount Total"
 			Local: Field: IE Amount     : Set as    : "Amount"
             
@@ -423,7 +455,7 @@ Objective(s) -
             [Line: IE Details]
 
 				Fields		: IE SrNo, IE SiName
-				Right Fields	: IE BatchNo, IE ExpDate, IE Qty, IE Rate, IE Discount, IE Discount Total, IE Amount
+				Right Fields	: IE BatchNo, IE ExpDate, IE Qty,IE RateUnit, IE Rate, IE Discount, IE Discount Total, IE Amount
 				Explode 	: Item Desc     : $$NumItems:UserDescription > 0  ;;;$$NumItems is a used defned functions which can be 
                                                                               ;;;used for counting purposes. It takes collection name as parameter                          
 
@@ -480,6 +512,13 @@ Objective(s) -
 					Border 	        : Thin Left
 					Format 	        : "NoSymbol"
 					Align   	: Center
+					
+				[Field: IE RateUnit]
+					Use 		: Name Field
+					Set as  	: $RateUnit
+					Border 	        : Thin Left
+					Align   	: Center
+					Invisible:True
 
                 [Field: IE Rate]
 
@@ -490,21 +529,23 @@ Objective(s) -
 					
                 [Field: IE Discount]
 
-					Use 		: Amount Field         ;;; field will display amount in foreign currency also
+					Use 		: Name Field         ;;; field will display amount in foreign currency also
 					Set as  	: $$AsAmount:$Discount ;;;$$AsAmount:$Discount       ;;; Predefined function AsAmount will set discount value in amount format
 					Border 	        : Thin Left
 					Align   	: Center
+					
 					
 				[Field: IE Discount Total]
 					Use: Amount Field
 					Set as: ($Discount/100)*($BilledQty * $Rate)
 					Border 	        : Thin Left
 					Align   	: Center
+					Invisible:True
 
                 [Field: IE Amount]
 
 					Use 		: Amount Field              ;;;Field will display amount value
-					Set as  	: $Amount+($Discount/100)*($BilledQty * $Rate)
+					Set as  	: $Amount ;;+($Discount/100)*($BilledQty * $Rate)
 					Border 	        : Thin Left Right
 					Format 	        : "NoComma, NoZero"
 					Align   	: Center
@@ -521,6 +562,7 @@ Objective(s) -
 			Local: Field: IE SrNo       : Set as    : ""
 			Local: Field: IE SiName     : Set as    : $LedgerName
 			Local: Field: IE Qty	    : Set as    : ""
+			Local: Field: IE RateUnit	    : Set as    : $RateUnit
 			Local: Field: IE Rate       : Set as    : $$String:$RateOfInvoiceTax + "%"    ;;function $$String used for conversion
 			Local: Field: IE Amount     : Set as    : $Amount
 			Local: Field: IE SiName     : Align     : Right
@@ -534,7 +576,7 @@ Objective(s) -
 
     [Part: Global Invoice Bottom Part]
 
-		Lines : Global Gross Line,Global Discount Line,Global Net Line,Global Vat Line,Global Dot Line,Global Payable Line,Global Space Line, Global AmtInWords,Global Space Line1,CmpUserNameLine
+		Lines : Global Gross Line,GlobalVatted Line,Global Discount Line,Global Net Line,Global Vat Line,Global Dot Line,Global Payable Line,Global Space Line, Global AmtInWords,Global Space Line1,CmpUserNameLine,Global Dec Line
 
         [Line: Global Discount Line]
 
@@ -556,12 +598,12 @@ Objective(s) -
 				Full Width		: Yes
 				Align		:Right
 			[Field: IE Discount0]	
-				Set as    : "Discount Total"
+				Set as    : "Amount Payable"
 				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount0] 
 				Use: Amount Field
-				Set as    	: ($$Total:IEDiscountTotal) ;;$$Total:IEAmount
+				Set as    	: ($Amount-(($DiscGiven/100)*$Amount))+((($VatGiven/100))*($Amount-(($DiscGiven/100)*$Amount))) ;;$$Total:IEAmount
 				Full Width	: Yes
 				Align		: Right
 				
@@ -585,15 +627,47 @@ Objective(s) -
 				Full Width		: Yes
 				Align		:Right
 			[Field: IE Discount3]
-				Use: Name Field
-				Set as    : "Gross Amount"
+				Use: Medium Prompt
+				Set as    : "Discount" + " " + $$String:$DiscGiven + " %"
 				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount3] 
 				Use: Amount Field
-				Set as    	: $$Total:IEAmount
+				Set as    	: ($DiscGiven/100)*$Amount
 				Full Width	: Yes
 				Align		: Right
+				
+		[Line: Global Vatted Line]
+
+			Add: Right Fields:IE SrN,IE SiNam, IE Qt, IE Rat, IE Discoun,IE Amoun
+			
+			[Field: IE SrN]
+				Set as    : ""
+				Full Width: Yes
+				
+			[Field: IE SiNam]         
+				Set as    	: ""
+				Full Width	: Yes
+			[Field: IE Qt]	
+				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
+				Full Width		: Yes
+				
+			[Field: IE Rat]		
+				Set as    	: ""
+				Full Width		: Yes
+				Align		:Right
+			[Field: IE Discoun]
+				Use: Medium Prompt
+				Set as    : "Vat" + " " + $$String:$VatGiven + " %"
+				Full Width		: Yes
+				Align		: Right
+			[Field: IE Amoun] 
+				Use: Amount Field
+				Set as    	: (($VatGiven/100))*($Amount-(($DiscGiven/100)*$Amount))
+				Full Width	: Yes
+				Align		: Right
+				
+
 				
 		[Line: Global Net Line]
 
@@ -615,12 +689,12 @@ Objective(s) -
 				Full Width		: Yes
 				Align		:Right
 			[Field: IE Discount4]	
-				Set as    : "Net Amount"
+				Set as    : "Balance C/F"
 				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount4] 
-				Use: Amount Field
-				Set as    	: $Amount
+				Use: Name Field
+				Set as    	: $BalanceCF
 				Full Width	: Yes
 				Align		: Right
 				
@@ -644,12 +718,12 @@ Objective(s) -
 				Full Width		: Yes
 				Align		:Right
 			[Field: IE Discount1]	
-				Set as    : "VAT (18%)"
+				Set as    : "Amount Paid"
 				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount1] 	
-				Use: Amount Field
-				Set as    	: ($$Total:IEAmount)*(0.18) ;;$$Total:IEAmount
+				Use: Name Field
+				Set as    	: $AmntPaid ;;$$Total:IEAmount
 				Full Width	: Yes
 				Align		: Right
 				
@@ -702,12 +776,12 @@ Objective(s) -
 				Full Width		: Yes
 				Align		:Right
 			[Field: IE Discount6]	
-				Set as    : "Amount Payable"
+				Set as    : "Balance To Pay"
 				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount6] 
 				Use: Amount Field
-				Set as    	: $Amount+($$Total:IEAmount)*(0.18) ;;$$Total:IEAmount
+				Set as    	: ($Amount+$BalanceCF)-$AmntPaid ;;;$Amount+($$Total:IEAmount)*(0.18) ;;$$Total:IEAmount
 				Full Width	: Yes
 				Align		: Right
 				
@@ -783,5 +857,18 @@ Objective(s) -
 				Set as  	: $$InWords:#IEAmount6 + " Only"   ;;;Inwords function is used to convert neumaric value into words
 				FullWidth 	: Yes
 				Style 	        : Small
+				
+		[Line: Global Dec Line]
+
+		Fields 	: Short Prompt, Global Dec
+		Local 	: Field : Short Prompt : Info : "Note: "
+
+		[Field: Global Dec]
+
+			Use 		: Name Field
+			Set always 	: Yes
+			FullWidth 	: Yes
+			Style 	        : Small
+			Set as		: "Check the goods before you leave. Goods once sold not be returnable. Bounced cheque charged 100,000/- will be paid with payment for that Cheque."
 
 ;; End-of-File
