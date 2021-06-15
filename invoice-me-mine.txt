@@ -3,10 +3,11 @@ Prerequisites-
 - 	place the invoiceword.xml file from the supporting folder to the tally installed folder.
 - 	include this tdl in the tally.ini
 
-Last modification ï¿½ 
+Last modification � 
 -	Altered on 28/01/2015
 
 */
+
 
 [#Part: VCHTitle2Right]		
  Add: Option :  VCH WeekDay0  : @@IsSales OR @@IsReceipt
@@ -175,881 +176,6 @@ Add : Option : My Invoice : @@IsSales OR @@IsReceipt
 
 Add : Option : My Invoice : @@IsSales OR @@IsReceipt
 
-[#Form : My Invoice]
-
-Add : Right Part : Http Inv Info,InvQrCode
-
-[Part:Http Inv Info]
-	Lines	: HTTP Inv Welcome3,HTTP Inv Welcome4
-
-[Line: HTTP Inv Welcome1]
-
-		Field : Medium Prompt, HTTP Inv Welcome1
-		Right Fields: LPO Date Prompt,LPO Date Field,Medium Prompt4, Global TaxInvNumber
-		Local : Field : Medium Prompt : Set as : "Fiscal Document No"
-		
-	[Field:Medium Prompt4]
-		Use:Medium Prompt
-		Set as    : "Tax Invoice No:"
-		
-		[Field: HTTP Inv Welcome1]
-		Storage : FiscalDocumentNumber
-			Align 	: Left
-
-[Line: HTTP Inv Welcome2]
-
-		Field : Medium Prompt, HTTP Inv Welcome2
-		Right Fields: LPO Med Prompt,LPO Med Field,Medium Prompt5, Global Ref Field
-		Local : Field : Medium Prompt : Set as : "Verification Code"
-		
-		[Field:Medium Prompt5]
-			Use:Medium Prompt
-			Set as    : "Reference No:"
-		
-		
-
-		[Field: HTTP Inv Welcome2]
-			Use: Name Field
-		Storage : AntifakeCode
-			Align 	: Left
-
-[Line: HTTP Inv Welcome3]
-
-		Field : Medium Prompt, HTTP Inv Welcome3
-		Local : Field : Medium Prompt : Set as : "QR Code"
-		Invisible:True
-
-		[Field: HTTP Inv Welcome3]
-			Storage : EfrisQRCode
-			Align 	: Left
-			Invisible:True
-			
-[Line: HTTP Inv Welcome4]
-		Field : Medium Prompt, HTTP Inv Welcome4
-		Local : Field : Medium Prompt : Set as : "QR Code Value"
-		Invisible:True
-		
-		[Field: HTTP Inv Welcome4]
-			Storage: QRCodeValue
-			Align 	: Left
-			Invisible:True
-			Set as: if $$IsEmpty:#HTTPWelcome3 Then "This is a computer generated invoice. Goods once sold are not returnable. Thank you for being our customer" Else #HTTPWelcome3
-			
-			 
-
-[Part: InvQrCode]
-	Line            : Empty
-	QR Code         : "This is a computer generated invoice. Goods once sold are not returnable. Thank you for being our customer": True
-	Width           : 20% screen
-	Height          : 20% screen
-
-	
-	
-	[Field:Medium Prompt0] 
-		Set as: "Payment Received by: "
-	
-	[Field: Preparedby]
-		Set as: ".................."
-	
-	[Field:Medium Prompt1]
-		Set as: "Issued by: "
-	
-	[Field : Approvedby]
-		Set as:"..................."
-		
-	[Field:Medium Prompt01] 
-		Set as: "Checked by: "
-	
-	[Field: Preparedby1]
-		Set as: "..................."
-	
-	[Field:Medium Prompt11]
-		Set as: "Delivered by: "
-	
-	[Field : Approvedby1]
-		Set as:"...................."
-		
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;				CUSTOM INVOICE														;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-/*
-Objective(s) -
--	This code demonstrates the alteration of Invoice Printing format
--	Default Invoice Format is overridden with a New Format
-*/
-
-[#Form: Comprehensive Invoice]
-
-    ;;option attribute contains the form name with logical condition
-    ;;optional forms will execute if the condition is trure
-
-	Option: Global Invoice    : @@IsSales ;;;@@IsSales is a system formula. System formula can be defined once and can be reused
-
-[#Form: Simple Printed Invoice]
-
-	Option: Global Invoice    : @@IsSales
-
-[!Form : Global Invoice]
-
-    ;;By default Form Global Invoice inherit all the details of simple printed invoice hence delete is used to remove the existing parts
-    ;;of simple printed invoice
-
-	Delete  	: Parts
-	Delete	    : Bottom Parts
-	Delete	    : PageBreak
-    
-    ;;Formatting the form
-
-	Space Bottom: 0
-	Space Left	: 0.25 inch
-	Space Right	: 0
-    
-    ;;Addtion of new parts in the form
-
-	Add         : Parts	        : Global Invoice Top Part
-	Add         : Parts	        : Global Invoice Body Part
-	Add         : Bottom Parts  : Global Invoice Bottom Part
-
-    [Part: Global Invoice Top Part]
-
-		Lines       : Global CmpName, Global VCHDate, Global PartyName,HTTP Inv Welcome1,HTTP Inv Welcome2, Global PartyAdd1, +
-                		Global ColumnTitles
-
-        ;;Repeat attribute is used to display address in multi lines. It report on collection partyaddress                            
-
-		Repeat      : Global PartyAdd1  : PartyAddress
-
-        [Line: Global CmpName]
-
-			Fields		: Global CmpName
-
-            [Field: Global CmpName]
-
-				Use 		: Name Field
-				Set as  	: "Cash Sale";;@@CMPMailNAme  ;;;setting the company name using system formula
-				FullWidth	: Yes
-				Align		: Centre
-
-        [Line: Global VCHDate]
-
-			Fields		: VchDateFiled
-			
-            
-            ;;In line itself the field can be defined with default values using the below syntax
-
-			[Field:VchDateFiled]
-				Set as:""
-			
-			
-			
-			[Field: LPO No Prompt]
-				Use: Medium Prompt
-				Set as:"LPO Number"
-				
-			[Field: LPO No Field]
-				Use: Name Field
-				Set as:$LPONumber
-	        ;;setting the date storage value to a field
-
-            [Field: Global VCHNo]
-
-				Use 		: Short Name Field
-				Set as  	: $Date     ;;setting the voucher number storage value
-
-        [Line: Global PartyName]
-
-			Fields		: Medium Prompt, Global PartyName
-			Right Fields: LPO No Prompt,LPO No Field,Medium Prompt2, Global VCHNo
-			Local: Field: Medium Prompt : Set as     : "Buyer Name: "
-			
-			[Field:Medium Prompt2]
-				Use:Medium Prompt
-				Set as    : "Voucher Date : "
-			
-
-			[Field: LPO Date Prompt]
-				Use: Medium Prompt
-				Set as:"LPO Date"
-				
-			[Field: LPO Date Field]
-				Use: Name Field
-				Set as:$LPODate
-				
-			[Field:LPO Med Prompt]
-			Use: Medium Prompt
-			Set as: "Med. Rep"
-			
-			[Field:LPO Med Field]
-				Use: Name Field
-				Set as: $MedRep
-				
-			[Field:Global Ref Field]
-				Use: Name Field
-				Set as: $LPORef
-				
-			[Field: Global TaxInvNumber]
-
-				Use 		: Short Name Field
-				Set as  	:$VoucherNumber
-
-            [Field: Global PartyName]
-
-				Use 		: Name Field
-				Set as  	: $PartyLedgerName        ;;setting the party ledger name value to the field
-
-        [Line: Global PartyAdd1]
-
-			Fields		: Global PartyAdd1
-
-            [Field: Global PartyAdd1]
-
-				Use 	    : Name Field
-				Set as	    : $Address
-				Indent	    : 10
-
-        [Line: Global Column Titles]
-
-			Use         : IE Details
-			Local: Field: Default 	    : Lines     : 2
-			Local: Field: Default 	    : Type      : String
-			Local: Field: Default 	    : Style     : Normal Bold
-			Local: Field: IE SrNo 	    : Set as    : "No"
-			Local: Field: IE SiName     : Set as    : "Particulars"
-			Local: Field: IE BatchNo     : Set as    : "Batch No"
-			Local: Field: IE ExpDate     : Set as    : "Exp. Date"
-			Local: Field: IE Qty        : Set as    : "Qty"
-			Local: Field: IE RateUnit        : Set as    : "Pack"
-			Local: Field: IE Rate 	    : Set as    : "Rate"
-			Local: Field: IE Discount   : Set as    : "Discount/Vat(%)"
-			Local: Field: IE Discount Total   : Set as    : "Discount Total"
-			Local: Field: IE Amount     : Set as    : "Amount"
-            
-            ;;Border attribute is used to provide border to the lines
-			Border      : Column Titles
-
-    [Part: Global Invoice Body Part]
-
-        ;;Two parts are defined inside a part
-
-		Parts 		: IE Details, LE Details
-
-        ;;vertical attribute is used to allign the parts vertically
-
-		Vertical 	: Yes
-
-        ;;Scroll attribute is used to make the lines scroll vertically
-
-		Scroll 		: Vertical 
-		Common Border: Yes
-
-        [Part: IE Details]
-
-			Lines 		: IE Details
-			Repeat 		: IE Details : Inventory Entries
-			Total 		: IE Qty, IE Discount,IE Discount Total, IE Amount
-
-            [Line: IE Details]
-
-				Fields		: IE SrNo, IE SiName
-				Right Fields	: IE BatchNo, IE ExpDate, IE Qty,IE RateUnit, IE Rate, IE Discount, IE Discount Total, IE Amount
-				Explode 	: Item Desc     : $$NumItems:UserDescription > 0  ;;;$$NumItems is a used defned functions which can be 
-                                                                              ;;;used for counting purposes. It takes collection name as parameter                          
-
-                [Part: Item Desc]
-
-					Lines 		: Item Desc 
-					Repeat  	: Item Desc     : UserDescription
-
-                    [Line: Item Desc]
-
-						Fields  	: Item Desc
-
-                        [Field: Item Desc]
-
-							Use 	    : Name Field
-							Width 	    : 40
-							Indent 	    : 8
-							Set as	    : $UserDescription
-							Style 	    : Normal Italic
-
-                [Field: IE SrNo]
-
-					Use 	    : Short Name Field
-					Set as      : $$Line
-					Border 	    : Thin Left
-					Width 	    : 5
-					
-				[Field: IE SIName]
-
-					Use 		: Name Field
-					Set as  	: $StockItemName
-					Border 	    : Thin Left
-					FullWIdth 	: Yes
-					
-				[Field: IE BatchNo]
-
-					Use 		: Name Field
-					Set as  	: $BatchNumber
-					Border 	    : Thin Left
-					Align 		: Center
-					Width 		: 12
-					
-				[Field: IE ExpDate]
-
-					Use 		: Name Field
-					Border 	    : Thin Left
-					Align 		: Center
-					Width 		: 12
-
-                [Field: IE Qty]
-
-					Use 		: Number Field
-					Set as  	: $BilledQty
-					Border 	        : Thin Left
-					Format 	        : "NoSymbol"
-					Align   	: Center
-					
-				[Field: IE RateUnit]
-					Use 		: Name Field
-					Set as  	: $RateUnit
-					Border 	        : Thin Left
-					Align   	: Center
-					Invisible:True
-
-                [Field: IE Rate]
-
-					Use 		: Rate Price Field
-					Set as  	: $Rate
-					Border 	     : Thin Left
-					Align   	: Center
-					
-                [Field: IE Discount]
-
-					Use 		: Name Field         ;;; field will display amount in foreign currency also
-					Set as  	: $$AsAmount:$Discount ;;;$$AsAmount:$Discount       ;;; Predefined function AsAmount will set discount value in amount format
-					Border 	        : Thin Left
-					Align   	: Center
-					
-					
-				[Field: IE Discount Total]
-					Use: Amount Field
-					Set as: ($Discount/100)*($BilledQty * $Rate)
-					Border 	        : Thin Left
-					Align   	: Center
-					Invisible:True
-
-                [Field: IE Amount]
-
-					Use 		: Amount Field              ;;;Field will display amount value
-					Set as  	: $Amount ;;+($Discount/100)*($BilledQty * $Rate)
-					Border 	        : Thin Left Right
-					Format 	        : "NoComma, NoZero"
-					Align   	: Center
-
-    [Part: LE Details]
-
-		Lines 		: LE Details 
-		Repeat  	: LE Details    : Ledger Entries
-		Scroll 	        : Vertical
-			
-        [Line: LE Details]
-
-			Use 		: IE Details
-			Local: Field: IE SrNo       : Set as    : ""
-			Local: Field: IE SiName     : Set as    : $LedgerName
-			Local: Field: IE Qty	    : Set as    : ""
-			Local: Field: IE RateUnit	    : Set as    : $RateUnit
-			Local: Field: IE Rate       : Set as    : $$String:$RateOfInvoiceTax + "%"    ;;function $$String used for conversion
-			Local: Field: IE Amount     : Set as    : $Amount
-			Local: Field: IE SiName     : Align     : Right
-			Local: Field: IE Qty	    : Format    : "NoZero"
-			Local: Field: IE Rate	    : Inactive 	: $RateOfInvoiceTax = 0
-			Local: Field: IE Rate	    : Type 	: String
-			Remove if	: $LedgerName = $PartyLedgerName
-			
-
-;; Empty attribute is used to avoid printing of party ledger name in the invoice
-
-    [Part: Global Invoice Bottom Part]
-
-		Lines : Global Gross Line,GlobalVatted Line,Global Discount Line,Global Net Line,Global Vat Line,Global Dot Line,Global Payable Line,Global Space Line, Global AmtInWords,Global Space Line1,CmpUserNameLine,Global Dec Line
-
-        [Line: Global Discount Line]
-
-			Add: Right Fields:IE SrNo0,IE SiName0, IE Qty0, IE Rate0, IE Discount0,IE Amount0
-			
-			[Field: IE SrNo0]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName0]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty0]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate0]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount0]	
-				Set as    : "Amount Payable"
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount0] 
-				Use: Amount Field
-				Set as    	: ($Amount-(($DiscGiven/100)*$Amount))+((($VatGiven/100))*($Amount-(($DiscGiven/100)*$Amount))) ;;$$Total:IEAmount
-				Full Width	: Yes
-				Align		: Right
-				
-		[Line: Global Gross Line]
-
-			Add: Right Fields:IE SrNo3,IE SiName3, IE Qty3, IE Rate3, IE Discount3,IE Amount3
-			
-			[Field: IE SrNo3]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName3]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty3]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate3]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount3]
-				Use: Medium Prompt
-				Set as    : "Discount" + " " + $$String:$DiscGiven + " %"
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount3] 
-				Use: Amount Field
-				Set as    	: ($DiscGiven/100)*$Amount
-				Full Width	: Yes
-				Align		: Right
-				
-		[Line: Global Vatted Line]
-
-			Add: Right Fields:IE SrN,IE SiNam, IE Qt, IE Rat, IE Discoun,IE Amoun
-			
-			[Field: IE SrN]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiNam]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qt]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rat]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discoun]
-				Use: Medium Prompt
-				Set as    : "Vat" + " " + $$String:$VatGiven + " %"
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amoun] 
-				Use: Amount Field
-				Set as    	: (($VatGiven/100))*($Amount-(($DiscGiven/100)*$Amount))
-				Full Width	: Yes
-				Align		: Right
-				
-
-				
-		[Line: Global Net Line]
-
-			Add: Right Fields:IE SrNo4,IE SiName4, IE Qty4, IE Rate4, IE Discount4,IE Amount4
-			
-			[Field: IE SrNo4]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName4]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty4]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate4]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount4]	
-				Set as    : "Balance C/F"
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount4] 
-				Use: Name Field
-				Set as    	: $BalanceCF
-				Full Width	: Yes
-				Align		: Right
-				
-			
-		[Line: Global Vat Line]
-			Add: Right Fields:IE SrNo1,IE SiName1, IE Qty1, IE Rate1, IE Discount1,IE Amount1
-			
-			[Field: IE SrNo1]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName1]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty1]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate1]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount1]	
-				Set as    : "Amount Paid"
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount1] 	
-				Use: Name Field
-				Set as    	: $AmntPaid ;;$$Total:IEAmount
-				Full Width	: Yes
-				Align		: Right
-				
-
-			;;;;;;DOT LINE
-			[Line: Global Dot Line]
-			Add: Right Fields:IE SrNo2,IE SiName2, IE Qty2, IE Rate2, IE Discount2,IE Amount2
-			
-			[Field: IE SrNo2]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName2]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty2]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate2]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount2]	
-				Set as    : ""
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount2] 	
-				Set as    	: ".........................." ;;$$Total:IEAmount
-				Full Width	: Yes
-				Align		: Right
-				
-			[Line: Global Payable Line]
-
-			Add: Right Fields:IE SrNo6,IE SiName6, IE Qty6, IE Rate6, IE Discount6,IE Amount6
-			
-			[Field: IE SrNo6]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName6]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty6]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate6]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount6]	
-				Set as    : "Balance To Pay"
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount6] 
-				Use: Amount Field
-				Set as    	: ($Amount+$BalanceCF)-$AmntPaid + #EIAmou ;;;$Amount+($$Total:IEAmount)*(0.18) ;;$$Total:IEAmount
-				Full Width	: Yes
-				Align		: Right
-				
-		[Line: Global Space Line]
-
-			Add: Right Fields:IE SrNo7,IE SiName7, IE Qty7, IE Rate7, IE Discount7,IE Amount7
-			
-			[Field: IE SrNo7]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName7]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty7]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate7]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount7]	
-				Set as    : ""
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount7] 
-				Use: Amount Field
-				Set as    	: ""
-				Full Width	: Yes
-				Align		: Right
-				
-
-				
-		[Line: Global Space Line1]
-
-			Add: Right Fields:IE SrNo8,IE SiName8, IE Qty8, IE Rate8, IE Discount8,IE Amount8
-			
-			[Field: IE SrNo8]
-				Set as    : ""
-				Full Width: Yes
-				
-			[Field: IE SiName8]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty8]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate8]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
-			[Field: IE Discount8]	
-				Set as    : ""
-				Full Width		: Yes
-				Align		: Right
-			[Field: IE Amount8] 
-				Use: Amount Field
-				Set as    	: ""
-				Full Width	: Yes
-				Align		: Right
-
-
-        [Line: Global AmtInWords]
-			Use	:	Name Field
-			Fields      : Short Prompt, Global AmtInWords
-			Local: Field: Short Prompt  : Set as    : "Amount in words : "
-
-            [Field: Global AmtInWords]
-
-				Use 		: Name Field
-				Set as  	: $$InWords:#IEAmount6 + " Only"   ;;;Inwords function is used to convert neumaric value into words
-				FullWidth 	: Yes
-				Style 	        : Small
-				
-		[Line: Global Dec Line]
-
-		Fields 	: Short Prompt, Global Dec
-		Local 	: Field : Short Prompt : Info : "Note: "
-
-		[Field: Global Dec]
-
-			Use 		: Name Field
-			Set always 	: Yes
-			FullWidth 	: Yes
-			Style 	        : Small
-			Set as		: "Check the goods before you leave. Goods once sold not be returnable. Bounced cheque charged 100,000/- will be paid with payment for that Cheque."
-
-
-/**
-VERSION 6.6
-/*
-Prerequisites-
-- 	place the invoiceword.xml file from the supporting folder to the tally installed folder.
-- 	include this tdl in the tally.ini
-
-Last modification ï¿½ 
--	Altered on 28/01/2015
-
-*/
-
-[#Part: VCHTitle2Right]		
- Add: Option :  VCH WeekDay0  : @@IsSales OR @@IsReceipt
- 
-[!Part :VCH WeekDay0]
-Add: Lines:LPONumberLine,LPODateLine,MedRepLine,LPORefLine,LPOVatLine
-
-[Line : LPONumberLine]
-Field : Medium Prompt, LPONumber,Simple Prompt, BalanceCF
-Local : Field : Medium Prompt : Set as : "LPO Number"
-Local : Field : Simple Prompt : Set as : "Balance C/F"
-
-[Field : BalanceCF]
-Use : Amount Field
-Storage : BalanceCF
-
-[Field : LPONumber]
-Use : Name Field
-Storage : LPONumber
-
-[Line : LPODateLine]
-Field : Medium Prompt, LPODate
-Local : Field : Medium Prompt : Set as : "LPO Date"
-
-
-[Field : LPODate]
-Use : Short Date Field
-Storage : LPODate
-Set as	: $Date
-
-[Line : MedRepLine]
-Field : Medium Prompt, MedRep,Simple Prompt, AmntPaid
-Local : Field : Simple Prompt : Set as : "Amount Paid"
-Local : Field : Medium Prompt : Set as : "Med Rep"
-
-[Field : MedRep]
-Use : Name Field
-Storage : MedRep
-
-[Field : AmntPaid]
-Use : Amount Field
-Storage : AmntPaid
-
-[Line : LPORefLine]
-Field : Medium Prompt, LPORef,Simple Prompt,DiscGiven
-Local : Field : Medium Prompt : Set as : "Reference"
-Local : Field : Simple Prompt : Set as : "Sales Discount(%)"
-
-[Field : LPORef]
-Use : Short Name Field
-Storage : LPORef
-
-[Field:DiscGiven]
-	Use : Amount Field
-	Storage    : DiscGiven
-	
-[Line : LPOVatLine]
-Field : Medium Prompt, VatRep
-Local : Field : Medium Prompt : Set as : "Sales VAT(%)"
-
-[Field:VatRep]
-	Use : Amount Field
-	Storage    : VatGiven
-
-
-[System: Formula]
-
-	CheckUser 	: $$CmpUserName = "Tally User"
-	IsCmpUserOn : $IsUserPrintOn:Company:##SVCurrentCompany
-
-[System: UDF]
-
-	IsUserPrintOn : Logical : 10005
-	FiscalDocumentNumber : String: 10006
-	AntifakeCode : String: 10007
-	EfrisQRCode : String: 10008
-	QRCodeValue : String: 10009
-	LPONumber	: String:10019
-	LPODate		:Date:10020
-	MedRep		:String:10013
-	LPORef		:String:10014
-	BalanceCF	:Amount:10015
-	AmntPaid	:Amount:10016
-	DiscGiven	:Amount:10022
-	VatGiven	:Amount:10023
-	
-
-
-[#Part: CMP AccFeat Right]
-
-	Add : Lines : At End : CMP UsrName
-
-	[Line: CMP UsrName]
-
-		Fields 	: Medium Prompt, CMP UsrNameFld
-		Local 	: Field : Medium Prompt : Info : "Print User Name ?"
-
-		Invisible : NOT $IsSecurityOn
-		Space Top : 0.4
-
-		[Field: CMP UsrNameFld]
-
-			Use 		: Logical Field
-			Type 		: Logical:Forced
-			Storage 	: IsUserPrintOn
-			Set always 	: Yes
-
-	
-	[Line: CmpUserNameLine]
-
-		Field : Short Prompt, Name Field, Medium Prompt0, Preparedby, Medium Prompt1, Approvedby,Medium Prompt01, Preparedby1, Medium Prompt11, Approvedby1
-
-		Local : Field : Short Prompt : Info 		: "Prepared by: "
-		Local : Field : Short Prompt : Invisible	: NOT $$InPrintMode
-		Local : Field : Short Prompt : Inactive 	: If @@checkUser OR NOT @@IsCmpUserOn Then Yes Else No
-		Local : Field : Name Field 	 : Set As 		: $$CmpUserName
-		Local : Field : Name Field 	 : Invisible	: NOT $$InPrintMode
-		Local : Field : Name Field 	 : Inactive 	: If @@checkUser OR NOT @@IsCmpUserOn Then Yes Else No
-		Local : Field : Default		 : Style 		: Normal Bold Italic
-		
-
-[#Part : EXPINV ExciseDetails]
-
-Delete : Lines : EXPINV ExciseRange, EXPINV ExciseRangeAddr, EXPINV ExciseDiv, EXPINV ExciseDivAddr, +
-EXPINV ExciseSerial, EXPINV InvoiceTime, EXPINV RemovalTime
-
-[!Form : My Invoice]
-
-;;Delete    : Parts
-
-;;Delete    : Bottom Parts
-
-Delete    : PageBreak
-
-;;Space Top : 0
-
-;;Space Bottom : 0
-
-;;Space Left : 0
-
-;;Space Right : 0
-
-;;Add : Part : My Invoice Top Part
-
-;;Add : Part : My Invoice Body Part
-
-;;Add : Bottom Part : My Invoice Bottom Part
-
-/**[#Form : Sales Color]
-
-Add : Print : Sales Invoice
-
-[Report : Sales Invoice]
-
-Form : Sales Invoice
-
-Object : Voucher**/
-
-
-
-[#Form : Comprehensive Invoice]
-
-Add : Option : My Invoice : @@IsSales OR @@IsReceipt
-
-[#Form : Simple Printed Invoice]
-
-Add : Option : My Invoice : @@IsSales OR @@IsReceipt
 
 [#Form : My Invoice]
 
@@ -1066,7 +192,7 @@ Add : Right Part : Http Inv Info,InvQrCode
 		
 	[Field:Medium Prompt4]
 		Use:Medium Prompt
-		Set as    : "Tax Invoice No:"
+		Set as    : $$String:$$Type:$VchType + " No:"
 		
 		[Field: HTTP Inv Welcome1]
 		Storage : FiscalDocumentNumber
@@ -1080,7 +206,9 @@ Add : Right Part : Http Inv Info,InvQrCode
 		
 		[Field:Medium Prompt5]
 			Use:Medium Prompt
-			Set as    : "Reference No:"
+			Set as    : "Ref. No:"
+			Full Width: Yes
+			Align: Right
 		
 		
 
@@ -1122,7 +250,7 @@ Add : Right Part : Http Inv Info,InvQrCode
 	
 	
 	[Field:Medium Prompt0] 
-		Set as: "Payment Received by: "
+		Set as: if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Received by: " Else "Payment Received by: "
 	
 	[Field: Preparedby]
 		Set as: ".................."
@@ -1134,7 +262,7 @@ Add : Right Part : Http Inv Info,InvQrCode
 		Set as:"..................."
 		
 	[Field:Medium Prompt01] 
-		Set as: "Checked by: "
+		Set as: if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Delivered by:" Else "Checked by: "
 	
 	[Field: Preparedby1]
 		Set as: "..................."
@@ -1206,7 +334,7 @@ Objective(s) -
             [Field: Global CmpName]
 
 				Use 		: Name Field
-				Set as  	: "Cash Sale";;@@CMPMailNAme  ;;;setting the company name using system formula
+				Set as  	: $VoucherTypeName;;;$$VchTypeSales:$VchName ;;"Cash Sale";;@@CMPMailNAme  ;;;setting the company name using system formula
 				FullWidth	: Yes
 				Align		: Centre
 
@@ -1225,10 +353,12 @@ Objective(s) -
 			[Field: LPO No Prompt]
 				Use: Medium Prompt
 				Set as:"LPO Number"
-				
+				Invisible:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then True Else False
+
 			[Field: LPO No Field]
 				Use: Name Field
 				Set as:$LPONumber
+				Invisible:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then True Else False
 	        ;;setting the date storage value to a field
 
             [Field: Global VCHNo]
@@ -1244,24 +374,26 @@ Objective(s) -
 			
 			[Field:Medium Prompt2]
 				Use:Medium Prompt
-				Set as    : "Voucher Date : "
+				Set as    : if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Date" Else "Voucher Date : "
 			
 
 			[Field: LPO Date Prompt]
 				Use: Medium Prompt
-				Set as:"LPO Date"
+				Set as:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Payment Terms" Else "LPO Date"
 				
 			[Field: LPO Date Field]
 				Use: Name Field
-				Set as:$LPODate
+				Set as:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "90 Days" Else $LPODate
 				
 			[Field:LPO Med Prompt]
 			Use: Medium Prompt
-			Set as: "Med. Rep"
+			Set as: if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Atten" Else "Med. Rep"
+			Align: Right
 			
 			[Field:LPO Med Field]
 				Use: Name Field
 				Set as: $MedRep
+				Align:Right
 				
 			[Field:Global Ref Field]
 				Use: Name Field
@@ -1275,7 +407,7 @@ Objective(s) -
             [Field: Global PartyName]
 
 				Use 		: Name Field
-				Set as  	: $PartyLedgerName        ;;setting the party ledger name value to the field
+				Set as  	: $EIBuyerName        ;;setting the party ledger name value to the field
 
         [Line: Global PartyAdd1]
 
@@ -1390,10 +522,12 @@ Objective(s) -
 					Align   	: Center
 					
 				[Field: IE RateUnit]
-					Use 		: Name Field
-					Set as  	: $RateUnits
+					Use 		: Rate Units Field;;QtyPrimaryField
+					Set as  	: $Rate
 					Border 	        : Thin Left
-					Invisible:True
+					Width		: 10
+					Align   	: Center
+					;;Invisible:True
 
                 [Field: IE Rate]
 
@@ -1473,9 +607,10 @@ Objective(s) -
 				Full Width		: Yes
 				Align		:Right
 			[Field: IE Discount0]	
-				Set as    : "Amount Payable"
+				Set as    : if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Total Amount" Else "Amount Payable"
 				Full Width		: Yes
 				Align		: Right
+				Invisible:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then True Else false
 			[Field: IE Amount0] 
 				Use: Amount Field
 				Set as    	: ($Amount-(($DiscGiven/100)*$Amount))+((($VatGiven/100))*($Amount-(($DiscGiven/100)*$Amount))) ;;$$Total:IEAmount
@@ -1487,7 +622,7 @@ Objective(s) -
 			Add: Right Fields:IE SrNo3,IE SiName3, IE Qty3, IE Rate3, IE Discount3,IE Amount3
 			
 			[Field: IE SrNo3]
-				Set as    : ""
+				Set as    : if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Delivery Terms" Else ""
 				Full Width: Yes
 				
 			[Field: IE SiName3]         
@@ -1514,57 +649,34 @@ Objective(s) -
 				
 		[Line: Global Vatted Line]
 
-			Add: Right Fields:IE SrN,IE SiNam, IE Qt, IE Rat, IE Discoun,IE Amoun
+			Add: Right Fields:IE SrN,IE Discoun,IE Amoun
 			
 			[Field: IE SrN]
-				Set as    : ""
+				Use: Name Field
+				Set as    : if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "(1). Depivery will be done within 2 working days from Date of Confirmed Purchase Order." Else ""
 				Full Width: Yes
 				
-			[Field: IE SiNam]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qt]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rat]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
 			[Field: IE Discoun]
 				Use: Medium Prompt
 				Set as    : "Vat" + " " + $$String:$VatGiven + " %"
-				Full Width		: Yes
-				Align		: Right
+				Align		: Left
 			[Field: IE Amoun] 
 				Use: Amount Field
 				Set as    	: (($VatGiven/100))*($Amount-(($DiscGiven/100)*$Amount))
-				Full Width	: Yes
 				Align		: Right
 				
 		
 		;;;;;;DOT LINE
 			[Line: Global DotVat Line]
-			Add: Right Fields:IE SrNo2V,IE SiName2V, IE Qty2V, IE Rate2V, IE Discount2V,IE Amount2V
+			Add: Right Fields:IE SrNo2V, IE Discount2V,IE Amount2V
 			
 			[Field: IE SrNo2V]
-				Set as    : ""
+				Use: Name Field
+				Set as    : if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "(2). Subject to be Delivered as per the Availibility in Market." Else ""
 				Full Width: Yes
 				
-			[Field: IE SiName2V]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty2V]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate2V]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
 			[Field: IE Discount2V]	
 				Set as    : ""
-				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount2V] 	
 				Set as    	: ".........................." ;;$$Total:IEAmount
@@ -1574,32 +686,23 @@ Objective(s) -
 				
 		[Line: Global Net Line]
 
-			Add: Right Fields:IE SrNo4,IE SiName4, IE Qty4, IE Rate4, IE Discount4,IE Amount4
+			Add: Right Fields:IE SrNo4, IE Discount4,IE Amount4
 			
 			[Field: IE SrNo4]
-				Set as    : ""
+				Use: Name Field
+				Set as    : if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "(3). Price will Change as per Availibility & Market." Else ""
 				Full Width: Yes
 				
-			[Field: IE SiName4]         
-				Set as    	: ""
-				Full Width	: Yes
-			[Field: IE Qty4]	
-				Set as    	: ""          ;;funtion total is used to take total of a particular field, here(IEQty)
-				Full Width		: Yes
-				
-			[Field: IE Rate4]		
-				Set as    	: ""
-				Full Width		: Yes
-				Align		:Right
 			[Field: IE Discount4]	
+				Use: Medium Prompt
 				Set as    : "Balance C/F"
-				Full Width		: Yes
 				Align		: Right
+				Invisible:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then True Else false
 			[Field: IE Amount4] 
 				Use: Name Field
 				Set as    	: $BalanceCF
-				Full Width	: Yes
 				Align		: Right
+				Invisible:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then true Else false
 				
 			
 		[Line: Global Vat Line]
@@ -1624,11 +727,13 @@ Objective(s) -
 				Set as    : "Amount Paid"
 				Full Width		: Yes
 				Align		: Right
+				Invisible:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then True Else false
 			[Field: IE Amount1] 	
 				Use: Name Field
 				Set as    	: $AmntPaid ;;$$Total:IEAmount
 				Full Width	: Yes
 				Align		: Right
+				Invisible:if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then true Else false
 				
 
 			;;;;;;DOT LINE
@@ -1655,7 +760,7 @@ Objective(s) -
 				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount2] 	
-				Set as    	: ".........................." ;;$$Total:IEAmount
+				Set as    	: if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "" Else ".........................." ;;$$Total:IEAmount
 				Full Width	: Yes
 				Align		: Right
 				
@@ -1679,7 +784,7 @@ Objective(s) -
 				Full Width		: Yes
 				Align		:Right
 			[Field: IE Discount6]	
-				Set as    : "Balance To Pay"
+				Set as    : if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "Total Amount" Else "Balance To Pay"
 				Full Width		: Yes
 				Align		: Right
 			[Field: IE Amount6] 
@@ -1772,10 +877,518 @@ Objective(s) -
 			Set always 	: Yes
 			FullWidth 	: Yes
 			Style 	        : Small
-			Set as		: "Check the goods before you leave. Goods once sold not be returnable. Bounced cheque charged 100,000/- will be paid with payment for that Cheque."
+			Set as		: if $$IsEqual:#GlobalCmpName:"Proforma Invoice" Then "This Proforma Invoice will be Valid for 7 days from date of Proforma Invoice & all the Prices are Current Market." Else "Check the goods before you leave. Goods once sold not be returnable. Bounced cheque charged 100,000/- will be paid with payment for that Cheque."
 
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;
+;;;;;;;;		sux receipt						;;;;;;;;
+;;;;;;;											;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; End-of-File
 
+[#Line: DSP VchClAmt]
+Add : Left Field : ClBalinWord
+Local : Field : Default: Style: normal bold
+Border: Thin Top Bottom:($$LineNumber = $$LastLineNumber ) AND $$InPrintMode
 
-**?
-;; End-of-File
+
+[#Line: LV FCthree]
+Add : Left Field:ClBalinWord1
+Local : Field : Default: Style: normal bold
+Border: Thin Top Bottom:($$LineNumber = $$LastLineNumber ) AND $$InPrintMode
+
+[Field: ClBalinWord]
+	Use: Medium Print
+Set as:$$InWords:@@VchClg + @@IfAmtthenOnlystring
+
+
+
+[Field: ClBalinWord1]
+Set as:$$InWords:@@BalanceVchDrCrAmt + " Only "
+Width:50% Screen
+Lines:0
+
+
+[System: Formulae]
+IfAmtthenOnlystring : If @@VchClg = 0 Then "" Else $$String:" Only"
+
+[System: Formula]
+Option:Sysforml:If $$SerialNumber <> 723011111 then yes else no
+;; End of File
+
+/* it Shows Closing Balance while print */
+
+	
+
+[#Report: Ledger Vouchers]
+	Local : Form : Ledger Vouchers : Add : Part : At End : LedgerTermsPart
+	
+[Part: LedgerTermsPart]
+	Add:Left Part:Amount Left Part
+	Add:Right Part:For Right Part
+	
+[Part: Amount Left Part]
+	Add: Line:AmntInWordsLine
+	Add: Bottom Line:DownBelowWords
+	
+	[Line: AmntInWordsLine]
+		Add: Left Field: SignDotFull
+		Add:Right Field: DeliveredByDot
+				
+		[Field: SignDotFull]
+			Use: Name Field
+			Full Width: Yes
+			Set as: ".............................................."
+			
+		[Field: DeliveredByDot]
+			Use: Name Field
+			Full Width: Yes
+			Set as: "................................."
+			
+		[Line: DownBelowWords]
+		Add: Left Field: SignFull
+		Add:Right Field: DeliveredBy
+				
+		[Field: SignFull]
+			Use: Name Field
+			Full Width: Yes
+			Set as: "Receiver Name, Sign & Company Stamp"
+			
+		[Field: DeliveredBy]
+			Use: Name Field
+			Full Width: Yes
+			Set as: "Delivered By:"
+
+[Part: For Right Part]
+	Add: Lines:ForWordsLine
+	
+[Line: ForWordsLine]
+	Add:Field:ForWard
+	
+[Field:ForWard]
+	Use: Medium Prompt
+	Set as: "For :"
+	
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;			OUT STANDING STATEMENT					;;;;;
+;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+[#Report: Ledger Outstandings]
+
+    Local : Form : Ledger Outstandings : Add : Part : At End : AxAmntInWards
+	
+	[Part: AxAmntInWards]
+		Add: Line: AxAmntInWardsLine,EmptyLineDotBelow,PrepLineBelow,PrepLineDown
+		
+	[Line: AxAmntInWardsLine]
+		Add:Field:AxAmntInWrds,AxAmntInWrd,AxmInWrdsMe
+		
+	[Field: AxAmntInWrds]
+		Use: Amount Field
+		Set as:$$AsAmount:$ClosingBalance:Ledger:##LedgerName
+		Invisible:True
+		
+	[Field: AxAmntInWrd]
+		Use: Medium Prompt
+		Set as:"Amount in Words"
+		
+	[Field: AxmInWrdsMe]
+		Use: Name Field
+		Set as:$$InWords:#AxAmntInWrds;;$$InWords:$AxAmntInWrds
+		Full Width:True
+		
+	[Line: PrepLineBelow]
+		Add:Left Field:RecNameDotLine,DelNemDotLine
+		Add:Left Field:ForDotLineVch
+		
+	[Field:RecNameDotLine]
+		Use: Short Name Field
+		Set as: "................................"
+		Full Width:True
+	[Field:DelNemDotLine]
+		Use: Short Name Field
+		Set as:"................................."
+		
+	[Field:ForDotLineVch]
+		Use: Medium Prompt
+		Set as: "For"
+		Full Width: True
+		Align: Left
+		
+	[Line: PrepLineDown]
+		Add:Left Field:RecNameDotLineDwn,DelNemDotLineDwn
+		Add:Left Field:ForDotLineVchDwn
+		
+	[Field:RecNameDotLineDwn]
+		Use: Short Name Field
+		Set as: "Receiver Name, Sign & Company Stamp"
+		Full Width:True
+	[Field:DelNemDotLineDwn]
+		Use: Short Name Field
+		Set as:"Delivered By"
+		
+	[Field:ForDotLineVchDwn]
+		Use: Medium Prompt
+		Set as: "Authorised Signitory"
+		Full Width:True
+		Align:Left
+	[Line:EmptyLineDotBelow]
+		Add:Field:EmptyLineFieldDot
+		
+	[Field: EmptyLineFieldDot]
+		Use: Name Field
+		Set as: ""
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;															;;;;;;;;;;;
+;;;;;;;;;			NEW RECEIPT											;;;;;;;;;;;
+;;;;;;;;															;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[#Form: Receipt Color]
+Delete:Print
+Add : Print : New Receipt :  ;;;;@@IsPayment OR @@IsReceipt
+;;PrintAfterSave : ##PPRCTPrintAfterSave OR ##PRCTPrintAfterSav
+
+[Report : New Receipt]
+
+Object : Voucher
+;; ;; PrintSet : Report Title : "Receipt"
+Filtered : Yes
+Print : VCHPrintConfigure
+;; ;; Empty : (NOT ##PRCTPrintEnabled) OR (NOT ##PRCTPrintAfterSave AND $$InAcceptMode) OR $$IsEmpty:$VoucherChequeName
+
+[Form : New Receipt]
+Parts : RcptCOmpanyAddr, RcptNoDate, Rcpt Body, RcptFoot
+Width : ##PRCTWidth inch
+Height : ##PRCTHeight inch
+Space Top : ##PRCTSpaceTop inch
+Space Bottom: 0.25 inch
+;; Space Left : 0.75 inch
+Space Right : 0.25 inch
+Width : 170 mms
+Space Left : 10 mms
+HorizontalAlign :Left
+
+
+[Part : RcptCompanyAddr]
+Lines : Rcpt Email,Rcpt Company, Rcpt Addr,Rcpt Email,EmptLine
+;;Repeat : Rcpt Addr : Company Address
+Local : Field : Simple Field : Align : Left
+Local : Field : Simple Field : FullWidth : Yes
+HorizontalAlign : Centre
+Border: Thin Box
+
+[Line: Rcpt Company]
+
+Fields : Simple Field
+Local : Field : Simple Field : Set as : @@CmpMailName
+Local : Field : Simple Field : Style : Normal Bold
+Local : Field : Simple Field : Invisible : True
+
+[Line: Rcpt Addr]
+
+Fields : Simple Field
+Local : Field : Simple Field : Set as : "";;$Address
+;;Local : Field : Simple Field : Invisible : True
+
+[Line: Rcpt Email]
+Fields : Simple Field
+Local : Field : Simple Field : Set as :"RECEIPT";;"Email- " +$EMail:Company:##SVCurrentCompany
+Local : Field : Simple Field : Style : Normal Bold
+Local : Field : Simple Field : Align : Center
+
+[Line:EmptLine]
+	Field: Name Field
+	Local:	Field: Name Field:Set as:""
+
+
+[Part : RcptNoDate]
+Lines :prntdttime, Rcpt NODate
+HorizontalAlign : Center
+Border: Thin Left Right
+SpaceBottom : 0.5
+
+[Line :prntdttime]
+Fields : Simple Prompt, RcptNo
+RightFields : Info Field, Prntdt
+Local : Field : Simple Prompt : Info : "Receipt No. :"
+Local : Field : Info Field : Info : "Date"
+
+[Field : Rcpt No]
+Set as : $VoucherNumber
+Style : Normal Bold
+
+[Field: Prntdt]
+Set as : $$String:$Date:UniversalDate;;$$MachineDate
+Style : Normal Bold
+;;Invisible:True
+
+[Line : Rcpt NoDate]
+Fields : Simple Prompt, Rcpt Date
+RightFields : Prnttime
+;;Local : Field : Simple Prompt : Info : "Receipt Date :"
+
+[Field : Prnttime]
+Set as : $$String:$Date:UniversalDate;;$$MachineTime
+Style : Normal Bold
+Invisible:True
+
+[Field: Rcpt Date]
+Set as : $$String:$Date:UniversalDate
+Style : Normal Bold
+Invisible:True
+
+[Part : Rcpt Body]
+Parts : Rcpt Top, Rcpt Bottom
+Vertical : Yes
+Border: Thin Box
+[Part : Rcpt Top]
+
+Lines : Rcpt Payer, Rcpt PayerAddr, Rcpt Words ;;Rcpt Thru ;;, Rcpt Remarks
+Repeat : Rcpt PayerAddr : Party Address
+Local : Field : Short Prompt : Style : Normal Italic
+Local : Field : Short Prompt : Width : 20
+HorizontalAlign : centre
+
+[Line: Rcpt Title]
+
+Fields : Rcpt Title
+SpaceBottom : 2
+
+[Field: Rcpt Title]
+
+Set as : "RECEIPT"
+Wide Spaced : Yes
+Style : Large Bold
+Border : Thin Bottom
+Align : Centre
+FullWidth : Yes
+
+[Line: Rcpt Payer]
+
+Fields : Short Prompt, Rcpt Payer
+Local : Field : Short Prompt : Info : "Received with thanks from :"
+
+SpaceBottom : 0.25
+
+[Field: Rcpt Payer]
+
+Set as : $LedgerName ;;VoucherChequeName
+Style : Normal Bold
+
+
+[Line : Rcpt PayerAddr]
+Fields : Short Prompt, Rcpt PartyAddr
+Local : Field : Info Field : Width : 17
+Local : Field : Info Field : Info : " "
+
+[Field : Rcpt PartyAddr]
+Set as:$Address
+
+
+[Line: Rcpt Words]
+
+Fields : Short Prompt, Rcpt Words
+Local : Field : Short Prompt : Info : "The sum of Amount "
+SpaceBottom : 1
+
+[Field: Rcpt Words]
+
+Set as : $$InWords:#RcptAmount+" Only"
+
+Style : Normal Bold
+Lines : 0
+FullWidth : Yes
+
+
+[Part : Rcpt Bottom]
+Parts : RcptBottomLeft, RcptBottomRight
+Vertical : No
+
+Local : Field : Short Prompt : Style : Normal Italic
+Local : Field : Short Prompt : Width : 20
+
+[Part : RcptBottomLeft]
+Lines : RcptThru1, Rcpt Thru2
+
+[Line: Rcpt Thru1]
+Local : Field : Short Prompt : Info : "by Cash / Cheque / D.D. No."
+Fields : Short Prompt
+
+[Field : Rcpt Thru1]
+Info : ""
+
+[Line: Rcpt Thru2]
+Field : Rcpt Thru2
+Fields : Short Prompt
+Local : Field : Short Prompt : Info : "Through Cash/Bank Account"
+
+[Field: Rcpt Thru2]
+Info : ""
+
+
+[Part : RcptBottomRight]
+Line : Rcpt Remarks1,Rcpt Remarks2
+
+[Line: Rcpt Remarks1]
+
+Fields : Rcpt Remarks1
+
+
+[Field: Rcpt Remarks1]
+
+Set as : $Narration
+Style : Normal Bold
+
+Width : 120 mms
+
+[Line: Rcpt Remarks2]
+
+Fields : Rcpt Remarks2
+[Field: Rcpt Remarks2]
+
+Set as : if $$IsLedOfGrp:@@BankName:$$GroupCash then $$LocaleString:"Cash" else $BankName
+Style : Small Bold
+
+Width : 120 mms
+
+[Part : Rcpt Foot]
+Lines : ForComp, RcptAmt, CompSign
+Border:Thin Left Right
+
+
+[Line : ForComp]
+Right Fields : ForComp
+SpaceBottom : 1
+
+[Field : ForComp]
+Set As : "For " + @@CmpMailName
+Style : Normal Bold
+Border: Thin Bottom Left
+[Line : RcptAmt]
+Fields : AmtPrompt, RcptAmount
+
+[Field : AmtPrompt]
+Info : "Received Amt"
+Style : Normal Bold
+Align : Left
+
+[Field: RcptAmount]
+
+Use : Amount Base Field
+Set as : $$CollectionField:$Amount:1:AllLedgerEntries
+Align : Left
+Border : Thin Bottom
+
+[Line : CompSign]
+Fields : ChqRel,Chkandvrif, PrepCheck
+Right Fields : CompSign
+Border : Thin Bottom
+
+[Field : ChqRel]
+Info : "Cheques are being subject to realization."
+Align : Left
+Style : Small Bold
+
+[Field : Chkandvrif]
+Info : "Checked & Verified By"
+SpaceLeft : 5 mms
+Style : Small
+Align : Left
+Border : Thin Top
+
+[Field : PrepCheck]
+Info : ""
+SpaceLeft : 5 mms
+Style : Small
+Align : Left
+Border : Thin Top
+
+[Field : CompSign]
+Info : "Authorised Signatory"
+Align : Right
+Style : Small Bold
+Border : Thin Top
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;TDL Developed by Axoblade
+
+[#Part: Rcpt Foot]
+Add:Lines:Before:ForComp:ExBal ;;;, RcptAmt1, NetBal
+
+[Line:ExBal]
+Space Top:0.5
+Field:ExBalFld
+
+[Field:ExBalFld]
+Field : Medium Prompt, Name Field
+Local : Field : Medium Prompt : Info : "Being Payment Received Against Of:"
+;;Local : Field : Medium Prompt : Width : 14
+Local : Field : Name Field : Set as : ""
+Local : Field : Name Field : Full Width:True
+;;;If ($$IsDr:$$ToValue:$Date:$ClosingBalance:Ledger:$$CollectionField:$LedgerName:1:LedgerEntries) then($$ToValue:$Date:$ClosingBalance:Ledger:$$CollectionField:$LedgerName:1:LedgerEntries)+$$abs:$$CollectionField:$Amount:1:AllLedgerEntries else ($$ToValue:$Date:$ClosingBalance:Ledger:$$CollectionField:$LedgerName:1:LedgerEntries) - $$abs:$$CollectionField:$Amount:1:AllLedgerEntries
+Local : Field : Name Field ;;;: Format : "Symbol,DrCr"
+;;;Invisible:Not ##BalPrntRcpt
+
+/**[Line:RcptAmt1]
+Field:RcptAmtFld
+
+[Field:RcptAmtFld]
+Field : Simple Prompt, Amount Field
+Local : Field : Simple Prompt : Info :$$LocaleString:"Receipt Amount:"
+Local : Field : Simple Prompt : Width : 14
+Local : Field : Simple Prompt : Border : Full Thin Bottom
+Local : Field : Amount Field : Set as : $$CollectionField:$Amount:1:AllLedgerEntries
+Local : Field : Amount Field : Format : "Symbol,DrCr"
+Local : Field : Amount Field : Border : Full Thin Bottom
+Invisible:Not ##BalPrntRcpt
+
+[Line:NetBal]
+Field:NetBalFld
+Border : Double Bottom
+[Field:NetBalFld]
+Field : Simple Prompt, Amount Field
+Local : Field : Simple Prompt : Info : "Current Balance:"
+Local : Field : Simple Prompt : Width : 14
+Local : Field : Amount Field : Set as : $$ToValue:$date:$ClosingBalance:Ledger:$$CollectionField:$LedgerName:1:LedgerEntries
+Local : Field : Amount Field : Format : "Symbol,DrCr"
+Local : Field : Amount Field : Border : Double Bottom
+Invisible:Not ##BalPrntRcpt
+**/
+[#Part: Receipt Print Config]
+Add:Line:At End:BalPrnt
+
+[Line: BalPrnt]
+
+Fields : Medium Prompt, BalPrnt
+Local : Field : Medium Prompt : Set as:"Show Mini Statement?"
+
+[Field: BalPrnt]
+
+Use : Logical Field
+Modifies : BalPrntRcpt
+
+[System:Variable]
+BalPrntRcpt:Yes
+
+[Variable:BalPrntRcpt]
+Type:Logical
+Persistent:Yes
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;											;;;;;;;
+;;;;;;;;;;		payment color						;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
